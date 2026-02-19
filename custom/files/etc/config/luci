@@ -32,25 +32,25 @@ config internal 'apply'
 
 config command
 	option name 'IMEI Change'
-	option command 'imei'
+	option command 'at_imei'
 	option param '1'
 
 config command
 	option name 'MEP Unlock'
-	option command 'mep'
+	option command 'at_mep'
 	option param '1'
 
 config command
 	option name 'PIPE Mode'
-	option command 'pipe'
+	option command 'at_pipe'
 	option param '1'
 
 config command
 	option name 'Cell Lock'
-	option command 'celllock'
+	option command 'at_celllock'
 	option param '1'
 
 config command
 	option name 'Modem Command'
-	option command 'atexe'
+	option command 'at_exe'
 	option param '1'

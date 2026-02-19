@@ -19,6 +19,7 @@ src-git sms_tool_js https://github.com/4IceG/luci-app-sms-tool-js
 src-git xray https://github.com/yichya/luci-app-xray
 src-git v2raya https://github.com/v2rayA/v2raya-openwrt
 src-git zapret https://github.com/remittor/zapret-openwrt;zap1
+src-git zapret2 https://github.com/remittor/zapret-openwrt;master
 EOF
 
 exit 0
