@@ -3,7 +3,7 @@ config sms_tool_js
 	option sendport '/dev/ttyACM0'
 	option ussdport '/dev/ttyACM0'
 	option atport '/dev/ttyACM0'
-	option storage 'ME'
+	option storage 'SM'
 	option mergesms '0'
 	option pnumber '63'
 	option prefix '0'

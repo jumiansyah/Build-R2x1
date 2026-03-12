@@ -44,8 +44,8 @@ on:
         description: "Custom DIY Script"
         type: choice
         options:
-          - diy_v1.sh
-          - diy_v2.sh
+          - diy.sh
+          - diy_noconfig.sh
       firmware_release:
         description: "Publish Firmware"
         type: boolean
@@ -169,6 +169,9 @@ jobs:
       - name: Generate Variables
         id: env
         run: |
+          export THREAD=$(($(nproc) + 1))
+          echo "THREAD=$THREAD" >> $GITHUB_ENV
+          echo "THREAD=$THREAD" >> $GITHUB_OUTPUT
           export SOURCE_OWNER=$(echo $SOURCE_URL | awk -F '/' '{print $(NF-1)}')
           echo "SOURCE_OWNER=$SOURCE_OWNER" >> $GITHUB_ENV
           echo "SOURCE_OWNER=$SOURCE_OWNER" >> $GITHUB_OUTPUT
@@ -245,7 +248,7 @@ jobs:
         run: |
           cd $OPENWRT_ROOT_PATH
           echo -e "$(nproc) Thread Compile"
-          make tools/compile -j$(($(nproc) + 1)) || make tools/compile -j1 V=s
+          make tools/compile -j$THREAD || make tools/compile -j1 V=s
 
       - name: Compile Toolchain
         if: ${{ env.REBUILD_CHECK == 'true' }}
@@ -253,7 +256,7 @@ jobs:
         run: |
           cd $OPENWRT_ROOT_PATH
           echo -e "$(nproc) Thread Compile"
-          make toolchain/compile -j$(($(nproc) + 1)) || make toolchain/compile -j1 V=s
+          make toolchain/compile -j$THREAD || make toolchain/compile -j1 V=s
           rm -rf .config dl bin
 
       - name: Generate Toolchain Image
@@ -362,7 +365,7 @@ jobs:
           cp .config ./bin/build.config
 
       - name: Upload Config To Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: Build-Config
           path: ${{ env.OPENWRT_ROOT_PATH }}/bin/build.config
@@ -371,7 +374,7 @@ jobs:
       - name: Load DIY
         run: |
           cp ./scripts/$DIY_SH $OPENWRT_ROOT_PATH/
-          mv ./custom $OPENWRT_ROOT_PATH/
+          mv ./files $OPENWRT_ROOT_PATH/
           cd $OPENWRT_ROOT_PATH
           chmod +x ./$DIY_SH && ./$DIY_SH
 
@@ -396,22 +399,22 @@ jobs:
           make clean
           make buildinfo
           make diffconfig buildversion feedsversion
-          make target/compile -j$(($(nproc) + 1)) IGNORE_ERRORS="m n" BUILD_LOG=1 || \
+          make target/compile -j$THREAD IGNORE_ERRORS="m n" BUILD_LOG=1 || \
           yes n | make target/compile -j1 V=s IGNORE_ERRORS=1
-          make package/compile -j$(($(nproc) + 1)) IGNORE_ERRORS=1 || make package/compile -j1 V=s IGNORE_ERRORS=1
+          make package/compile -j$THREAD IGNORE_ERRORS=1 || make package/compile -j1 V=s IGNORE_ERRORS=1
           make package/index
 
       - name: Generate Firmware
         timeout-minutes: 60
         run: |
           cd $OPENWRT_ROOT_PATH
-          make package/install -j$(($(nproc) + 1)) || make package/install -j1 V=s
-          make target/install -j$(($(nproc) + 1)) || make target/install -j1 V=s
+          make package/install -j$THREAD || make package/install -j1 V=s
+          make target/install -j$THREAD || make target/install -j1 V=s
           make json_overview_image_info
           make checksum
 
       - name: Upload Bin To Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.BUILD_DATE }}
           path: ${{ env.OPENWRT_ROOT_PATH }}/bin
